@@ -1,6 +1,8 @@
 import AudioToolbox
 import UIKit
 
+let replayMessage = ["久しぶり", "そうそう、キウイ好き? ", "キウイキウイ", "キウイ好きなんだよねー", "ところで、明日って暇?", "だめだ、用事あった（笑）こっちから話しかけてごめん", "てか、ごめん私のナイトが呼んでる","ブロントさんうける（笑）", "また連絡するねー、じゃぁねー"]
+var replayIndex = 0;
 let messageFontSize: CGFloat = 17
 let toolBarMinHeight: CGFloat = 44
 let textViewMaxHeight: (portrait: CGFloat, landscape: CGFloat) = (portrait: 272, landscape: 90)
@@ -134,24 +136,24 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
     }
 
-//    // #iOS7.1
-    override func willAnimateRotationToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
-        super.willAnimateRotationToInterfaceOrientation(toInterfaceOrientation, duration: duration)
-
-        if UIInterfaceOrientationIsLandscape(toInterfaceOrientation) {
-            if toolBar.frame.height > textViewMaxHeight.landscape {
-                toolBar.frame.size.height = textViewMaxHeight.landscape+8*2-0.5
-            }
-        } else { // portrait
-            updateTextViewHeight()
-        }
-    }
-//    // #iOS8
-//    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator!) {
-//        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+    // #iOS7.1
+//    override func willAnimateRotationToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
+//        super.willAnimateRotationToInterfaceOrientation(toInterfaceOrientation, duration: duration)
+//
+//        if UIInterfaceOrientationIsLandscape(toInterfaceOrientation) {
+//            if toolBar.frame.height > textViewMaxHeight.landscape {
+//                toolBar.frame.size.height = textViewMaxHeight.landscape+8*2-0.5
+//            }
+//        } else { // portrait
+//            updateTextViewHeight()
+//        }
 //    }
+    // #iOS8
+    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator!) {
+        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+    }
 
-    func numberOfSectionsInTableView(tableView: UITableView!) -> Int {
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return chat.loadedMessages.count
     }
 
@@ -275,7 +277,44 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.endUpdates()
         tableViewScrollToBottomAnimated(true)
         AudioServicesPlaySystemSound(messageSoundOutgoing)
+        replyAction()
     }
+    func replyAction() {
+        var replayText = getReplay()
+        if (replayText != ""){
+            // Autocomplete text before sending #hack
+            textView.resignFirstResponder()
+            textView.becomeFirstResponder()
+            
+            chat.loadedMessages.append([Message(incoming: true, text: replayText, sentDate: NSDate())])
+            textView.text = nil
+            updateTextViewHeight()
+            sendButton.enabled = false
+            
+            let lastSection = tableView.numberOfSections()
+            tableView.beginUpdates()
+            tableView.insertSections(NSIndexSet(index: lastSection), withRowAnimation: .Automatic)
+            tableView.insertRowsAtIndexPaths([
+                NSIndexPath(forRow: 0, inSection: lastSection),
+                NSIndexPath(forRow: 1, inSection: lastSection)
+                ], withRowAnimation: .Automatic)
+            tableView.endUpdates()
+            tableViewScrollToBottomAnimated(true)
+            AudioServicesPlaySystemSound(messageSoundOutgoing)
+        }
+    }
+    
+    func getReplay() -> String
+    {
+        if (replayMessage.count == replayIndex){
+            return "";
+        }
+        var returnText = replayMessage[replayIndex]
+        replayIndex++
+        return returnText
+    }
+    
+    
 
     func tableViewScrollToBottomAnimated(animated: Bool) {
         let numberOfRows = tableView.numberOfRowsInSection(0)
