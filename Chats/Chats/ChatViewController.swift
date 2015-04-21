@@ -275,7 +275,7 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
             NSIndexPath(forRow: 1, inSection: lastSection)
             ], withRowAnimation: .Automatic)
         tableView.endUpdates()
-        tableViewScrollToBottomAnimated(true)
+        tableViewScrollToBottomAnimated(true, section: lastSection)
         AudioServicesPlaySystemSound(messageSoundOutgoing)
         replyAction()
     }
@@ -316,10 +316,10 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     
 
-    func tableViewScrollToBottomAnimated(animated: Bool) {
-        let numberOfRows = tableView.numberOfRowsInSection(0)
+    func tableViewScrollToBottomAnimated(animated: Bool, section: Int) {
+        let numberOfRows = tableView.numberOfRowsInSection(section)
         if numberOfRows > 0 {
-            tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: numberOfRows-1, inSection: 0), atScrollPosition: .Bottom, animated: animated)
+            tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: numberOfRows-1, inSection: section), atScrollPosition: .Bottom, animated: animated)
         }
     }
 
