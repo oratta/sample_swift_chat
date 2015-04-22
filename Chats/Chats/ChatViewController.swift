@@ -277,7 +277,11 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.endUpdates()
         tableViewScrollToBottomAnimated(true, section: lastSection)
         AudioServicesPlaySystemSound(messageSoundOutgoing)
-        replyAction()
+        let delay = 2.0 * Double(NSEC_PER_SEC)
+        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+        dispatch_after(delayTime, dispatch_get_main_queue(), {
+            self.replyAction()
+        })
     }
     func replyAction() {
         var replayText = getReplay()
@@ -299,7 +303,7 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 NSIndexPath(forRow: 1, inSection: lastSection)
                 ], withRowAnimation: .Automatic)
             tableView.endUpdates()
-            tableViewScrollToBottomAnimated(true)
+            tableViewScrollToBottomAnimated(true, section: lastSection)
             AudioServicesPlaySystemSound(messageSoundOutgoing)
         }
     }
